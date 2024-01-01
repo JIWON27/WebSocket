@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Websocket Chat</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css}"/>
+    <style th:inline="text">
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>채팅방 리스트</h3>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <label class="input-group-text">방제목</label>
+        </div>
+        <input type="text" class="form-control" id="room_input"/>
+        <div class="input-group-append">
+            <button class="btn btn-primary" th:onclick="createRoom()">채팅방 개설</button>
+        </div>
+    </div>
+
+    <ul class="list-group">
+        <li class="list-group-item list-group-item-action"
+            th:each="room : ${chatRooms}"
+            th:text="${room.roomName}"
+            th:roomId="${room.roomId}"
+            th:onclick="enterRoom(this.getAttribute('roomId'))">
+        </li>
+    </ul>
+</div>
+<!-- JavaScript -->
+<script th:src="@{/webjars/axios/0.17.1/dist/axios.min.js}"></script>
+<script>
+    function createRoom() {
+        const inputValue = document.getElementById("room_input").value;
+        if("" === inputValue ) {
+            alert("방 제목을 입력해주세요.")
+        } else {
+            // 방 제목을 입력한 경우 채팅방 생성
+            const url = "http://localhost:8080/chat-api/room"
+            axios.post(url, null, {
+                params : {name : inputValue} // RequestParam
+            })
+                .then(function (response) {
+                    // 성공적으로 응답을 받았을 때 수행할 작업을 추가.
+                    alert("방이 생성되었습니다.", response.data);
+                })
+                .catch(function (error) {
+                    // 오류가 발생.
+                    alert("방 생성 중 오류 발생:", error);
+                });
+        }
+        location.reload();
+    }
+
+    function enterRoom(roomId) {
+        const sender = prompt("닉네임을 작성해주세요 : ")
+        if (sender != "") {
+            localStorage.setItem("ws_chat.sender", sender);
+            localStorage.setItem("ws_chat.roomId", roomId);
+            location.href="/chat-api/room/enter/"+roomId
+        }
+    }
+
+</script>
+
+</body>
+</html>

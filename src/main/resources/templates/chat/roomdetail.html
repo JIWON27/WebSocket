@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Websocket ChatRoom</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css}">
+</head>
+<body>
+<div class="container" id="app">
+    <div>
+        <h2 th:text="${room.roomName}"></h2>
+    </div>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <label class="input-group-text">내용</label>
+        </div>
+        <input type="text" class="form-control">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="button"
+            th:onclick="sendMessage()">보내기</button>
+        </div>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item" >
+            <span></span>
+        </li>
+    </ul>
+    <div></div>
+</div>
+<!-- JavaScript -->
+<script th:src="@{/webjars/axios/0.17.1/dist/axios.min.js}"></script>
+<script th:src="@{/webjars/sockjs-client/1.1.2/sockjs.min.js}"></script>
+<script th:src="@{/webjars/stomp-websocket/2.3.3-1/stomp.min.js}"></script>
+<script th:inline="javascript">
+    const sock = new SockJS("/ws-stomp") // 이게 뭐지?
+    const ws = Stomp.over(sock) // 이게 뭐지?
+</script>
+</body>
+</html>
