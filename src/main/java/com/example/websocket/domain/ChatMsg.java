@@ -12,6 +12,10 @@ import lombok.Setter;
 @Getter
 public class ChatMsg {
 
+  public enum MessageType {
+    ENTER, TALK
+  }
+
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id
   private Long id;
@@ -19,5 +23,6 @@ public class ChatMsg {
   private String roomId;
   private String sender;
   private String message;
+  private MessageType messageType;
 
 }

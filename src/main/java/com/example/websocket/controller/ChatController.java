@@ -1,8 +1,10 @@
 package com.example.websocket.controller;
 
+import com.example.websocket.domain.ChatMsg;
 import com.example.websocket.domain.ChatRoom;
-import com.example.websocket.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,24 +13,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/chat")
 public class ChatController {
-  // 채팅방 생성 및 조회
+  private final SimpMessageSendingOperations messagingTemplate;
 
-  private final ChatService chatService;
-
-  // 채팅방 생성
-  @PostMapping
-  public ChatRoom createRoom(@RequestParam String name) {
-    return chatService.createRoom(name);
-  }
-
-  // 전체 조회
-  @GetMapping
-  public List<ChatRoom> findAllRoom() {
-    return chatService.findAllRoom();
-  }
-  // 단건 조회
-  @GetMapping("/{roomId}")
-  public ChatRoom findAllRoom(@PathVariable String roomId) {
-    return chatService.findRoomById(roomId);
+  @MessageMapping("/chat/message")
+  public void message(ChatMsg message) {
+    if (ChatMsg.MessageType.ENTER.equals(message.getMessageType()))
+      message.setMessage(message.getSender() + "님이 입장하셨습니다.");
+    messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
   }
 }
