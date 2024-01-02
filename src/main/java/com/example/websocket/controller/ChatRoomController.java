@@ -40,7 +40,7 @@ public class ChatRoomController {
   public String roomDetail(Model model, @PathVariable String roomId) {
     ChatRoom room = chatRoomRepository.findRoomById(roomId);
     model.addAttribute("room", room);
-    return "chat/roomdetail";
+    return "chat/room_detail";
   }
   // 특정 채팅방 조회
   @GetMapping("/room/{roomId}")

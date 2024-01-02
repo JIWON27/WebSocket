@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Websocket ChatRoom</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css}">
+</head>
+<body>
+<div class="container" id="app">
+    <div>
+        <h2 id="roomName" th:text="${room.roomName}"></h2>
+    </div>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <label class="input-group-text">내용</label>
+        </div>
+        <input type="text" class="form-control" id="messageInput">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="button" th:onclick="sendMessage()">보내기</button>
+        </div>
+    </div>
+    <ul class="list-group" id="messageList">
+        <!-- 메세지가 동적으로 추가 -->
+    </ul>
+    <div></div>
+</div>
+<!-- JavaScript -->
+<script th:src="@{/webjars/axios/0.17.1/dist/axios.min.js}"></script>
+<script th:src="@{/webjars/sockjs-client/1.1.2/sockjs.min.js}"></script>
+<script th:src="@{/webjars/stomp-websocket/2.3.3-1/stomp.min.js}"></script>
+<script th:inline="javascript">
+    // WebSocket & Stomp initialization
+    let sock = new SockJS("/ws-stomp");
+    let ws = Stomp.over(sock);
+    let reconnect = 0;
+
+    // Data object
+    let data = {
+        roomId: localStorage.getItem('ws_chat.roomId'),
+        room: {},
+        sender: localStorage.getItem('ws_chat.sender'),
+        message: '',
+        messages: []
+    };
+
+    function connect() {
+        // pub/sub event
+        ws.connect({}, function (frame) {
+            // 구독자들에게 메세지 뿌려주기
+            ws.subscribe("/sub/chat/room/" + data.roomId, function (message) {
+                let recv = JSON.parse(message.body);
+                recvMessage(recv);
+            });
+            // 처음엔 입장.
+            ws.send("/pub/chat/message", {}, JSON.stringify({
+                type: 'ENTER',
+                roomId: data.roomId,
+                sender: data.sender
+            }));
+        }, function (error) {
+            if (reconnect++ <= 5) {
+                setTimeout(function () {
+                    console.log("connection reconnect");
+                    sock = new SockJS("/ws-stomp");
+                    ws = Stomp.over(sock);
+                    connect();
+                }, 10 * 1000);
+            }
+        });
+    }
+
+    function findRoom() {
+        axios.get('/chat/room/' + data.roomId).then(function(response) {
+            data.room = response.data;
+        });
+    }
+    // 메세지 보내기
+    function sendMessage() {
+        data.message = document.getElementById("messageInput").value;
+        ws.send("/pub/chat/message", {}, JSON.stringify({
+            type: 'TALK',
+            roomId: data.roomId,
+            sender: data.sender,
+            message: data.message
+        }));
+        data.message = '';
+    }
+
+    // 메세지 받기
+    function recvMessage(recv) {
+        data.messages.unshift({
+            "type": recv.type,
+            "sender": recv.type == 'ENTER' ? '[알림]' : recv.sender,
+            "message": recv.message
+        });
+        displayMessage(recv);
+    }
+    // Initialize connection
+    connect();
+
+    // 메시지 표시 함수
+    function displayMessage(message) {
+        let messageList = document.getElementById("messageList");
+        let listItem = document.createElement("li");
+        listItem.textContent = message.sender + ': ' + message.message;
+        messageList.appendChild(listItem);
+    }
+</script>
+</body>
+</html>

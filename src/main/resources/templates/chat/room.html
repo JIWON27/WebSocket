@@ -6,11 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
     <!-- CSS -->
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css}"/>
-    <style th:inline="text">
-        [v-cloak] {
-            display: none;
-        }
-    </style>
 </head>
 <body>
 <div class="container" id="app">
@@ -65,11 +60,12 @@
     }
 
     function enterRoom(roomId) {
+        // 로그인 기능 만들면 이거 없앨꺼임. 로그인할 때 설정한 닉네임으로 입장하도로고할것.
         const sender = prompt("닉네임을 작성해주세요 : ")
         if (sender != "") {
             localStorage.setItem("ws_chat.sender", sender);
             localStorage.setItem("ws_chat.roomId", roomId);
-            location.href="/chat-api/room/enter/"+roomId
+            location.href="/chat-api/room/enter/"+roomId //입장은 Get 메서드인가보다?
         }
     }
 

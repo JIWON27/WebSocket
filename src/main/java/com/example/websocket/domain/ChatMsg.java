@@ -20,8 +20,8 @@ public class ChatMsg {
   @Id
   private Long id;
 
-  private String roomId;
-  private String sender;
+  private String roomId; //roomId랑 조인해서 해당 room에만 보여지게하면될듯
+  private String sender; //sender가 나면 오른쪽에 위치
   private String message;
   private MessageType messageType;
 
