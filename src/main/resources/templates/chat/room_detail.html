@@ -55,11 +55,11 @@
             });
             // 처음엔 입장.
             ws.send("/pub/chat/message", {}, JSON.stringify({
-                type: 'ENTER',
+                messageType: 'ENTER',
                 roomId: data.roomId,
                 sender: data.sender
             }));
-        }, function (error) {
+        }, function (error) { // 재연결
             if (reconnect++ <= 5) {
                 setTimeout(function () {
                     console.log("connection reconnect");
@@ -80,7 +80,7 @@
     function sendMessage() {
         data.message = document.getElementById("messageInput").value;
         ws.send("/pub/chat/message", {}, JSON.stringify({
-            type: 'TALK',
+            messageType: 'TALK',
             roomId: data.roomId,
             sender: data.sender,
             message: data.message
